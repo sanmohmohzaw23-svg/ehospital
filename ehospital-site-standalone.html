@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>eHospital – Smart Digital Medicine (prototype site)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;700&family=Noto+Sans+Myanmar:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#F3F7FD;--panel:#fff;--ink:#16213D;--mute:#53607F;--line:#DDE5F3;--pri:#3347B8;--onpri:#fff;--soft:#E4EBFB;--foot:#3347B8;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0F1426;--panel:#171E37;--ink:#E9EEFB;--mute:#9FAACB;--line:#27315A;--pri:#8FA2FF;--onpri:#0F1426;--soft:#1E2850;--foot:#1B2352}}
+:root[data-theme="dark"]{--bg:#0F1426;--panel:#171E37;--ink:#E9EEFB;--mute:#9FAACB;--line:#27315A;--pri:#8FA2FF;--onpri:#0F1426;--soft:#1E2850;--foot:#1B2352}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:calc(72px + env(safe-area-inset-top,0px))}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.6 Figtree,"Noto Sans Myanmar",system-ui,sans-serif}
+html[lang=my] body{line-height:1.9}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--panel);z-index:10}
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:9;background:var(--panel);border-bottom:1px solid var(--line)}
+.bar{max-width:1100px;margin:0 auto;padding:10px 20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.logo{font-weight:700;color:var(--pri);font-size:1.15rem;display:flex;align-items:center;gap:8px;text-decoration:none}
+nav{display:flex;gap:18px;flex:1;justify-content:center;flex-wrap:wrap}
+nav a{color:var(--ink);text-decoration:none;font-size:.92rem}nav a:hover{color:var(--pri)}
+.right{display:flex;gap:8px;align-items:center}
+select{font:inherit;font-size:.88rem;color:var(--ink);background:var(--bg);border:1.5px solid var(--line);border-radius:10px;padding:5px 8px}
+.btn{display:inline-block;font:inherit;font-weight:700;font-size:.9rem;text-decoration:none;border-radius:999px;padding:8px 18px;border:1.5px solid var(--pri);color:var(--pri);background:transparent;cursor:pointer}
+.btn.pri{background:var(--pri);color:var(--onpri)}
+a:focus-visible,select:focus-visible{outline:3px solid var(--pri);outline-offset:2px}
+section{padding:56px 20px}.in{max-width:1000px;margin:0 auto}
+.alt{background:var(--panel)}
+.eyebrow{color:var(--pri);font-weight:700;font-size:.85rem;letter-spacing:.04em;margin:0 0 6px}
+h1{font-size:clamp(2rem,5vw,3rem);line-height:1.15;margin:0 0 12px;color:var(--pri)}
+h2{font-size:1.6rem;margin:0 0 12px;line-height:1.25}
+h3{font-size:1.05rem;margin:0 0 6px;color:var(--pri)}
+p{margin:0 0 12px;color:var(--mute)}
+.hero{display:grid;grid-template-columns:1.1fr .9fr;gap:32px;align-items:center}
+.hero p.sub{font-size:1.15rem;color:var(--ink)}
+.cta{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+.phone{justify-self:center;width:230px;height:400px;background:var(--panel);border:2px solid var(--line);border-radius:34px;padding:18px 16px;box-shadow:0 18px 40px rgba(51,71,184,.18);display:flex;flex-direction:column;gap:14px}
+.phone .top{height:8px;width:60px;background:var(--line);border-radius:6px;align-self:center}
+.wave{display:flex;gap:5px;align-items:center;justify-content:center;height:90px;background:var(--soft);border-radius:18px}
+.wave i{display:block;width:6px;border-radius:4px;background:var(--pri);height:20px;animation:w 1.2s ease-in-out infinite}
+.wave i:nth-child(2){animation-delay:.1s}.wave i:nth-child(3){animation-delay:.2s}.wave i:nth-child(4){animation-delay:.3s}.wave i:nth-child(5){animation-delay:.4s}.wave i:nth-child(6){animation-delay:.5s}.wave i:nth-child(7){animation-delay:.6s}
+@keyframes w{50%{height:62px}}
+@media (prefers-reduced-motion:reduce){.wave i{animation:none;height:40px}}
+.line{height:12px;border-radius:6px;background:var(--line)}.line.s{width:60%}
+.mic{margin:auto auto 0;width:54px;height:54px;border-radius:50%;background:var(--pri);color:var(--onpri);display:grid;place-items:center;font-size:1.5rem}
+.grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px;margin-top:22px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px}
+.alt .card{background:var(--bg)}
+.ic{width:44px;height:44px;border-radius:12px;background:var(--soft);display:grid;place-items:center;font-size:1.4rem;margin-bottom:10px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:32px;align-items:center}
+.art{background:var(--soft);border-radius:28px;min-height:240px;display:grid;place-items:center;font-size:5rem}
+.stats{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:18px}
+.stat{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px 26px;text-align:center}
+.stat b{display:block;font-size:1.6rem;color:var(--pri)}
+.center{text-align:center}.center .cta{justify-content:center}
+footer{background:var(--foot);color:#fff;padding:26px 20px calc(26px + env(safe-area-inset-bottom,0px))}
+footer .in{display:flex;flex-wrap:wrap;gap:20px 40px;justify-content:space-between;font-size:.88rem}
+footer b{display:block;margin-bottom:2px}
+@media (max-width:760px){.hero,.two{grid-template-columns:1fr}.phone{order:-1}nav{order:3;flex-basis:100%;justify-content:flex-start}}
+[hidden]{display:none!important}
+#appov{position:fixed;inset:0;z-index:30;background:var(--bg);display:flex;flex-direction:column;padding-top:env(safe-area-inset-top,0px)}
+#appov .ob{padding:8px 14px;background:var(--panel);border-bottom:1px solid var(--line)}
+#appov iframe{flex:1;width:100%;border:0;background:var(--bg)}
+</style>
+</head>
+<body>
+<header><div class="bar">
+  <a class="logo" href="#home">🩺 eHospital</a>
+  <nav>
+    <a href="#home" data-i="home"></a><a href="#about" data-i="about"></a><a href="#services" data-i="services"></a><a href="#ai" data-i="ai"></a><a href="#contact" data-i="contact"></a>
+  </nav>
+  <div class="right">
+    <select id="lang" aria-label="Language"><option value="en">English</option><option value="fr">Français</option><option value="kk">Қазақша</option><option value="my">မြန်မာ</option></select>
+    <a class="btn app" data-i="login"></a><a class="btn pri app" data-i="signup"></a>
+  </div>
+</div></header>
+
+<section id="home"><div class="in">
+  <div class="hero">
+    <div>
+      <h1 data-i="h1"></h1>
+      <p class="sub" data-i="sub"></p>
+      <div class="cta"><a class="btn pri app" data-i="join"></a><a class="btn app" data-i="try"></a></div>
+    </div>
+    <div class="phone" aria-hidden="true"><div class="top"></div>
+      <div class="wave"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+      <div class="line"></div><div class="line s"></div><div class="line"></div>
+      <div class="mic">🎙️</div></div>
+  </div>
+  <div class="grid3">
+    <div class="card"><div class="ic">🏥</div><h3 data-i="f1t"></h3><p data-i="f1d"></p></div>
+    <div class="card"><div class="ic">🎙️</div><h3 data-i="f2t"></h3><p data-i="f2d"></p></div>
+    <div class="card"><div class="ic">📱</div><h3 data-i="f3t"></h3><p data-i="f3d"></p></div>
+  </div>
+</div></section>
+
+<section id="about" class="alt"><div class="in two">
+  <div class="art" aria-hidden="true">👩‍⚕️</div>
+  <div><p class="eyebrow" data-i="at"></p><h2 data-i="ah"></h2><p data-i="ap"></p></div>
+</div></section>
+
+<section><div class="in center">
+  <h2 data-i="mt"></h2>
+  <div class="grid3">
+    <div class="card"><h3 data-i="m1t"></h3><p data-i="m1d"></p></div>
+    <div class="card"><h3 data-i="m2t"></h3><p data-i="m2d"></p></div>
+    <div class="card"><h3 data-i="m3t"></h3><p data-i="m3d"></p></div>
+  </div>
+</div></section>
+
+<section id="services" class="alt"><div class="in">
+  <p class="eyebrow" data-i="st"></p><h2 data-i="sh"></h2>
+  <div class="grid3">
+    <div class="card"><div class="ic">🩺</div><h3 data-i="d1t"></h3><p data-i="d1d"></p><a class="btn pri app" data-i="more"></a></div>
+    <div class="card"><div class="ic">🧑‍🤝‍🧑</div><h3 data-i="d2t"></h3><p data-i="d2d"></p><a class="btn pri app" data-i="more"></a></div>
+    <div class="card"><div class="ic">🏢</div><h3 data-i="d3t"></h3><p data-i="d3d"></p><a class="btn pri app" data-i="more"></a></div>
+  </div>
+</div></section>
+
+<section id="ai"><div class="in two">
+  <div><p class="eyebrow" data-i="ait"></p><h2 data-i="aih"></h2><p data-i="aip"></p></div>
+  <div class="art" aria-hidden="true">🧠</div>
+</div>
+<div class="in"><div class="grid3">
+  <div class="card"><p data-i="a1" style="margin:0"></p></div>
+  <div class="card"><p data-i="a2" style="margin:0"></p></div>
+  <div class="card"><p data-i="a3" style="margin:0"></p></div>
+</div></div></section>
+
+<section class="alt"><div class="in center">
+  <h2 data-i="cta"></h2>
+  <div class="stats">
+    <div class="stat"><b>4</b><span data-i="l1"></span></div>
+    <div class="stat"><b>4</b><span data-i="l2"></span></div>
+    <div class="stat"><b>3</b><span data-i="l3"></span></div>
+  </div>
+  <div class="cta"><a class="btn pri app" data-i="join"></a><a class="btn" href="#about" data-i="ask"></a></div>
+</div></section>
+
+<footer id="contact"><div class="in">
+  <div><b>🩺 eHospital</b><span data-i="foot"></span></div>
+  <div><b>Contact</b>info@voicetotext.ehospital</div>
+  <div><b>Project 9E</b>AI Powered Voice-to-Text Conversation for the e-Hospital Platform</div>
+</div></footer>
+
+<div id="appov" hidden><div class="ob"><button class="btn" id="back" data-i="back"></button></div>
+<iframe id="appf" title="Voice consult app" allow="microphone; clipboard-write"></iframe></div>
+<script type="text/plain" id="appsrc"><!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>e-Hospital Voice (mobile prototype)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;700&family=Noto+Sans+Myanmar:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#EEF5F5;--panel:#fff;--ink:#12262A;--mute:#5B7176;--line:#D3E0E1;--teal:#0F5C63;--tint:#DCEFEA;--rec:#D6334A;--warn:#FFF4D6;--ok:#2E7D4F;--bad:#B3261E;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0E1A1C;--panel:#152428;--ink:#E6F1F1;--mute:#93AEB2;--line:#26393D;--teal:#5CC4C9;--tint:#183A3C;--warn:#3A3318;--ok:#6FCF97;--bad:#FF8A80}}
+:root[data-theme="dark"]{--bg:#0E1A1C;--panel:#152428;--ink:#E6F1F1;--mute:#93AEB2;--line:#26393D;--teal:#5CC4C9;--tint:#183A3C;--warn:#3A3318;--ok:#6FCF97;--bad:#FF8A80}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.5 Figtree,"Noto Sans Myanmar",system-ui,sans-serif}
+html[lang=my] body{line-height:1.85}
+.app{max-width:430px;margin:0 auto;min-height:100dvh;padding:12px 14px calc(88px + env(safe-area-inset-bottom,0px))}
+h1{font-size:1.2rem;margin:0}
+.top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.role{display:inline-flex;border:1.5px solid var(--teal);border-radius:999px;overflow:hidden}
+.role button{border:0;background:none;color:var(--teal);font:inherit;font-weight:700;padding:5px 12px;cursor:pointer}
+.role button[aria-pressed=true]{background:var(--teal);color:var(--bg)}
+.langs{display:flex;gap:6px;overflow-x:auto;margin:10px 0}
+.langs button{flex:none;border:1.5px solid var(--line);background:var(--panel);color:var(--ink);font:inherit;padding:5px 13px;border-radius:999px;cursor:pointer}
+.langs button[aria-pressed=true]{background:var(--teal);border-color:var(--teal);color:var(--bg);font-weight:700}
+.note{background:var(--warn);border-radius:10px;padding:8px 12px;font-size:.82rem;margin-bottom:10px}
+.dbs{font-size:.8rem;color:var(--mute);margin-bottom:10px}
+.dbs i{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--mute);margin-right:6px}.dbs.ok i{background:var(--ok)}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:12px}
+label{display:block;font-weight:700;font-size:.9rem;margin:10px 0 4px}
+input,textarea{width:100%;font:inherit;color:var(--ink);background:var(--bg);border:1.5px solid var(--line);border-radius:10px;padding:9px 11px}
+textarea{min-height:96px;resize:vertical}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.micwrap{display:flex;align-items:center;gap:12px;margin:12px 0}
+.mic{width:68px;height:68px;border-radius:50%;border:0;background:var(--teal);color:var(--bg);display:grid;place-items:center;cursor:pointer;flex:none}
+.mic svg{width:30px;height:30px}
+.mic.on{background:var(--rec);color:#fff;animation:p 1.4s infinite}
+@keyframes p{to{box-shadow:0 0 0 18px rgba(214,51,74,0)}}
+@media (prefers-reduced-motion:reduce){.mic.on{animation:none}}
+.btn{font:inherit;font-weight:700;border:1.5px solid var(--teal);background:var(--panel);color:var(--teal);padding:9px 14px;border-radius:12px;cursor:pointer}
+.btn.pri{background:var(--teal);color:var(--bg)}.btn.full{width:100%}.btn.bad{border-color:var(--bad);color:var(--bad)}
+button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid var(--teal);outline-offset:2px}
+.chip{display:inline-block;border-radius:999px;padding:1px 10px;font-size:.78rem;font-weight:700;background:var(--tint);color:var(--teal)}
+.chip.ok{color:var(--ok)}.chip.bad{color:var(--bad)}
+.meta{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px}
+.k{color:var(--mute);font-size:.82rem}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(84px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:8px 14px;border-radius:999px;font-size:.88rem;opacity:0;pointer-events:none;transition:opacity .2s;max-width:92%}
+.toast.show{opacity:1}
+nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(100%,430px);display:flex;background:var(--panel);border-top:1px solid var(--line);padding:6px 6px calc(8px + env(safe-area-inset-bottom,0px))}
+nav button{flex:1;border:0;background:none;font:inherit;color:var(--mute);padding:8px 4px;border-radius:10px;cursor:pointer}
+nav button[aria-current=true]{color:var(--teal);font-weight:700;background:var(--tint)}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="top"><h1>🩺 e-Hospital Voice</h1>
+    <div class="role" id="role" role="group"><button data-r="p" aria-pressed="true"></button><button data-r="d" aria-pressed="false"></button></div></div>
+  <div class="langs" id="langs" role="group" aria-label="Language"></div>
+  <div class="note" id="disc"></div>
+  <div class="dbs" id="dbs"><i></i><span></span></div>
+  <main id="view"></main>
+</div>
+<nav id="nav"></nav>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+const L={
+en:{n:"English",code:"en-CA",rp:"Patient",rd:"Doctor",tspeak:"Speak",tvisits:"My visits",tcases:"Cases",tclaims:"Claims",
+name:"Full name",age:"Age",phone:"Phone",allergy:"Allergies",sym:"Describe your symptoms",mic:"Tap the microphone and speak",stop:"Listening… tap to stop",
+submit:"Send to doctor",sent:"Sent. A doctor will review it.",wait:"Waiting",done:"Prescribed",listen:"Listen",dx:"Diagnosis and advice",rx:"Prescription",reply:"Send to patient",
+claim:"Make a claim",ins:"Insurance ID",amt:"Amount",sendclaim:"Submit claim",csub:"Claim submitted",capp:"Approved",crej:"Rejected",approve:"Approve",reject:"Reject",
+empty:"Nothing here yet",need:"Add your name and symptoms first.",nosr:"Speech recognition is not supported in this browser. Type instead.",nosyn:"Listening is not available for this language on this device.",demo:"Sample",
+disc:"Demo with fictional data. Do not enter real patient information.",dbok:"Connected to database",dbno:"Saved on this device (demo storage)",
+smp:"I have had a fever and a sore throat for two days.",saved:"Saved"},
+fr:{n:"Français",code:"fr-CA",rp:"Patient",rd:"Médecin",tspeak:"Parler",tvisits:"Mes visites",tcases:"Dossiers",tclaims:"Réclamations",
+name:"Nom complet",age:"Âge",phone:"Téléphone",allergy:"Allergies",sym:"Décrivez vos symptômes",mic:"Touchez le microphone et parlez",stop:"Écoute… touchez pour arrêter",
+submit:"Envoyer au médecin",sent:"Envoyé. Un médecin va le consulter.",wait:"En attente",done:"Ordonnance faite",listen:"Écouter",dx:"Diagnostic et conseils",rx:"Ordonnance",reply:"Envoyer au patient",
+claim:"Faire une réclamation",ins:"N° d'assurance",amt:"Montant",sendclaim:"Soumettre la réclamation",csub:"Réclamation soumise",capp:"Approuvée",crej:"Refusée",approve:"Approuver",reject:"Refuser",
+empty:"Rien pour l'instant",need:"Ajoutez d'abord votre nom et vos symptômes.",nosr:"La reconnaissance vocale n'est pas prise en charge. Écrivez plutôt.",nosyn:"L'écoute n'est pas disponible pour cette langue sur cet appareil.",demo:"Exemple",
+disc:"Démo avec données fictives. N'entrez pas de vraies données de patients.",dbok:"Connecté à la base de données",dbno:"Enregistré sur cet appareil (stockage de démonstration)",
+smp:"J'ai de la fièvre et mal à la gorge depuis deux jours.",saved:"Enregistré"},
+kk:{n:"Қазақша",code:"kk-KZ",rp:"Пациент",rd:"Дәрігер",tspeak:"Сөйлеу",tvisits:"Қабылдаулар",tcases:"Жағдайлар",tclaims:"Талаптар",
+name:"Толық аты-жөні",age:"Жасы",phone:"Телефон",allergy:"Аллергия",sym:"Белгілеріңізді сипаттаңыз",mic:"Микрофонды басып, сөйлеңіз",stop:"Тыңдап тұр… тоқтату үшін басыңыз",
+submit:"Дәрігерге жіберу",sent:"Жіберілді. Дәрігер қарап шығады.",wait:"Күтуде",done:"Дәрі жазылды",listen:"Тыңдау",dx:"Диагноз және кеңес",rx:"Рецепт",reply:"Пациентке жіберу",
+claim:"Талап ұсыну",ins:"Сақтандыру нөмірі",amt:"Сома",sendclaim:"Талапты жіберу",csub:"Талап жіберілді",capp:"Мақұлданды",crej:"Қабылданбады",approve:"Мақұлдау",reject:"Қабылдамау",
+empty:"Әзірге ештеңе жоқ",need:"Алдымен атыңызды және белгілерді енгізіңіз.",nosr:"Бұл браузер дауысты тануды қолдамайды. Мәтінді теріңіз.",nosyn:"Бұл тілде тыңдау осы құрылғыда жоқ.",demo:"Үлгі",
+disc:"Жалған деректермен демо. Нақты пациент деректерін енгізбеңіз.",dbok:"Дерекқорға қосылды",dbno:"Осы құрылғыда сақталды (демо жады)",
+smp:"Екі күннен бері қызуым көтеріліп, тамағым ауырып тұр.",saved:"Сақталды"},
+my:{n:"မြန်မာ",code:"my-MM",rp:"လူနာ",rd:"ဆရာဝန်",tspeak:"ပြောရန်",tvisits:"ကျွန်ုပ်၏ ကုသမှုများ",tcases:"လူနာများ",tclaims:"တောင်းခံမှုများ",
+name:"အမည်အပြည့်အစုံ",age:"အသက်",phone:"ဖုန်း",allergy:"ဓာတ်မတည့်မှု",sym:"ရောဂါလက္ခဏာများကို ဖော်ပြပါ",mic:"မိုက်ခရိုဖုန်းကို နှိပ်ပြီး ပြောပါ",stop:"နားထောင်နေသည်… ရပ်ရန် နှိပ်ပါ",
+submit:"ဆရာဝန်ထံ ပို့ရန်",sent:"ပို့ပြီးပါပြီ။ ဆရာဝန်က စစ်ဆေးပါမည်။",wait:"စောင့်ဆိုင်းဆဲ",done:"ဆေးညွှန်းပြီး",listen:"နားထောင်ရန်",dx:"ရောဂါရှာဖွေချက်နှင့် အကြံပြုချက်",rx:"ဆေးညွှန်း",reply:"လူနာထံ ပို့ရန်",
+claim:"ကုန်ကျစရိတ် တောင်းခံရန်",ins:"အာမခံ အမှတ်",amt:"ပမာဏ",sendclaim:"တောင်းခံမှု ပို့ရန်",csub:"တောင်းခံမှု ပို့ပြီး",capp:"အတည်ပြုပြီး",crej:"ပယ်ချခဲ့သည်",approve:"အတည်ပြုရန်",reject:"ပယ်ချရန်",
+empty:"ယခုတွင် ဘာမှမရှိသေးပါ",need:"အမည်နှင့် ရောဂါလက္ခဏာကို အရင်ထည့်ပါ။",nosr:"ဤဘရောက်ဇာတွင် အသံမှတ်သားခြင်း မပါပါ။ စာရိုက်ပါ။",nosyn:"ဤဘာသာစကားအတွက် နားထောင်ခြင်း ဤစက်တွင် မရနိုင်ပါ။",demo:"နမူနာ",
+disc:"စိတ်ကူးယဉ်ဒေတာဖြင့် နမူနာဖြစ်သည်။ လူနာအစစ်အမှန်၏ အချက်အလက်များကို မထည့်ပါနှင့်။",dbok:"ဒေတာဘေ့စ်နှင့် ချိတ်ဆက်ပြီး",dbno:"ဤစက်ထဲတွင် သိမ်းထားသည် (နမူနာသိမ်းဆည်းမှု)",
+smp:"နှစ်ရက်ကတည်းက ဖျားပြီး လည်ချောင်းနာနေပါတယ်။",saved:"သိမ်းပြီး"}
+};
+const $=id=>document.getElementById(id),esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+let lang="en",role="p",tab="speak",openId=null,listening=false,rec=null,db=null,uid=null,cases=[];
+const KEY="ehospital_cases_v1";
+try{cases=JSON.parse(localStorage.getItem(KEY)||"[]");}catch(_){cases=[];}
+function persist(){try{localStorage.setItem(KEY,JSON.stringify(cases.slice(0,200)));}catch(_){}}
+const form={name:"",age:"",phone:"",allergy:"",sym:""};
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition,t=()=>L[lang];
+const MIC='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>';
+let tt;function toast(m){const e=$("toast");e.textContent=m;e.classList.add("show");clearTimeout(tt);tt=setTimeout(()=>e.classList.remove("show"),3200);}
+const me=()=>uid||"local";
+
+/* ---- data layer: database if available, memory otherwise ---- */
+async function addCase(r){if(db){await db.collection("cases").add(r);}else{r.id="l"+Date.now();cases.unshift(r);persist();}}
+async function patch(id,p){if(db){await db.collection("cases").doc(id).update(p);}else{const c=cases.find(x=>x.id===id);if(c)Object.assign(c,p);persist();}}
+
+/* ---- chrome ---- */
+function chrome(){
+  const T=t();document.documentElement.lang=lang;
+  $("disc").textContent=T.disc;
+  $("role").children[0].textContent=T.rp;$("role").children[1].textContent=T.rd;
+  [...$("role").children].forEach(b=>b.setAttribute("aria-pressed",b.dataset.r===role));
+  $("langs").innerHTML=Object.keys(L).map(k=>`<button data-l="${k}" aria-pressed="${k===lang}">${L[k].n}</button>`).join("");
+  const d=$("dbs");d.classList.toggle("ok",true);d.lastChild.textContent=db?T.dbok:T.dbno;
+  const tabs=role==="p"?[["speak",T.tspeak],["visits",T.tvisits]]:[["cases",T.tcases],["claims",T.tclaims]];
+  if(!tabs.some(x=>x[0]===tab))tab=tabs[0][0];
+  $("nav").innerHTML=tabs.map(([k,l])=>`<button data-t="${k}" ${k===tab?'aria-current="true"':""}>${l}</button>`).join("");
+}
+function view(){chrome();const v=$("view");
+  v.innerHTML=tab==="speak"?vSpeak():tab==="visits"?vVisits():tab==="cases"?vCases():vClaims();
+  if(tab==="speak")bindSpeak();}
+const chip=(c)=>{const T=t();
+  if(c.status==="prescribed")return`<span class="chip ok">${T.done}</span>`;return`<span class="chip">${T.wait}</span>`;};
+const cchip=(s)=>{const T=t();return s==="approved"?`<span class="chip ok">${T.capp}</span>`:s==="rejected"?`<span class="chip bad">${T.crej}</span>`:`<span class="chip">${T.csub}</span>`;};
+const when=ts=>new Date(ts).toLocaleString([], {dateStyle:"medium",timeStyle:"short"});
+
+/* ---- patient: speak ---- */
+function vSpeak(){const T=t();
+  return `<div class="card">
+  <label for="f-name">${T.name}</label><input id="f-name" value="${esc(form.name)}" autocomplete="off">
+  <div class="row"><div><label for="f-age">${T.age}</label><input id="f-age" inputmode="numeric" value="${esc(form.age)}"></div>
+  <div><label for="f-phone">${T.phone}</label><input id="f-phone" inputmode="tel" value="${esc(form.phone)}"></div></div>
+  <label for="f-allergy">${T.allergy}</label><input id="f-allergy" value="${esc(form.allergy)}">
+  <label for="f-sym">${T.sym}</label><textarea id="f-sym" lang="${lang}">${esc(form.sym)}</textarea>
+  <div class="micwrap"><button class="mic ${listening?"on":""}" id="mic" aria-label="${T.mic}">${MIC}</button>
+  <div><div id="mst">${listening?T.stop:T.mic}</div><button class="btn" id="smp" style="margin-top:6px;padding:4px 10px">${T.demo}</button></div></div>
+  <button class="btn pri full" id="send">${T.submit}</button></div>`;
+}
+function bindSpeak(){
+  ["name","age","phone","allergy","sym"].forEach(k=>$("f-"+k).addEventListener("input",e=>form[k]=e.target.value));
+  $("mic").onclick=toggleMic;
+  $("smp").onclick=()=>{form.sym=t().smp;$("f-sym").value=form.sym;};
+  $("send").onclick=async()=>{
+    if(!form.name.trim()||!form.sym.trim()){toast(t().need);return;}
+    stopMic();
+    try{await addCase({pid:me(),name:form.name.trim(),age:form.age,phone:form.phone,allergy:form.allergy,symptoms:form.sym.trim(),lang,ts:Date.now(),status:"waiting",dx:"",rx:"",claim:null});}
+    catch(e){toast("DB: "+(e.message||e.code));return;}
+    form.sym="";toast(t().sent);tab="visits";view();
+  };
+}
+function toggleMic(){
+  if(listening){stopMic();return;}
+  if(!SR){toast(t().nosr);return;}
+  rec=new SR();rec.lang=t().code;rec.continuous=true;rec.interimResults=false;
+  rec.onresult=e=>{for(let i=e.resultIndex;i<e.results.length;i++)if(e.results[i].isFinal){
+    form.sym=(form.sym?form.sym.trimEnd()+" ":"")+e.results[i][0].transcript.trim();const f=$("f-sym");if(f)f.value=form.sym;}};
+  rec.onerror=e=>{if(e.error==="not-allowed"||e.error==="service-not-allowed"){stopMic();toast(t().nosr);}};
+  rec.onend=()=>{if(listening){try{rec.start();}catch(_){}}};
+  try{rec.start();listening=true;}catch(_){toast(t().nosr);return;}
+  $("mic").classList.add("on");$("mst").textContent=t().stop;
+}
+function stopMic(){listening=false;if(rec){try{rec.stop();}catch(_){}}const m=$("mic");if(m){m.classList.remove("on");$("mst").textContent=t().mic;}}
+
+/* ---- patient: visits + claims ---- */
+function vVisits(){const T=t(),mine=cases.filter(c=>c.pid===me());
+  if(!mine.length)return`<p class="k">${T.empty}</p>`;
+  return mine.map(c=>`<div class="card"><div class="meta"><span class="k">${when(c.ts)} · ${String(c.lang).toUpperCase()}</span>${chip(c)}</div>
+  <p style="margin:0 0 6px">${esc(c.symptoms)}</p>
+  ${c.status==="prescribed"?`<div class="k">${T.dx}</div><p style="margin:0 0 6px">${esc(c.dx)}</p><div class="k">${T.rx}</div><p style="margin:0 0 8px">${esc(c.rx)}</p>`:""}
+  ${c.claim?`<div class="meta"><span class="k">${T.claim}: ${esc(c.claim.ins)} · ${esc(c.claim.amt)}</span>${cchip(c.claim.status)}</div>`
+  :c.status==="prescribed"?`<div class="row"><input id="ci-${c.id}" placeholder="${T.ins}"><input id="ca-${c.id}" inputmode="decimal" placeholder="${T.amt}"></div>
+  <button class="btn pri full" style="margin-top:8px" data-claim="${c.id}">${T.sendclaim}</button>`:""}</div>`).join("");
+}
+
+/* ---- doctor ---- */
+function speak(txt,code){
+  if(!window.speechSynthesis){toast(t().nosyn);return;}
+  speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(txt);u.lang=L[code]?L[code].code:code;
+  const ok=speechSynthesis.getVoices().some(v=>v.lang.toLowerCase().startsWith(u.lang.slice(0,2).toLowerCase()));
+  if(speechSynthesis.getVoices().length&&!ok)toast(t().nosyn);
+  speechSynthesis.speak(u);
+}
+function vCases(){const T=t();
+  if(!cases.length)return`<p class="k">${T.empty}</p>`;
+  return cases.map(c=>`<div class="card"><div class="meta"><b>${esc(c.name)} <span class="k">${esc(c.age)}</span></b>${chip(c)}</div>
+  <div class="k">${when(c.ts)} · ${String(c.lang).toUpperCase()} · ${esc(c.phone)} · ${T.allergy}: ${esc(c.allergy||"-")}</div>
+  <p>${esc(c.symptoms)}</p>
+  <button class="btn" data-listen="${c.id}">🔊 ${T.listen}</button>
+  ${c.status==="prescribed"?`<p class="k" style="margin-top:10px">${T.dx}: ${esc(c.dx)}<br>${T.rx}: ${esc(c.rx)}</p>`:
+  `<label for="dx-${c.id}">${T.dx}</label><textarea id="dx-${c.id}" style="min-height:64px"></textarea>
+   <label for="rx-${c.id}">${T.rx}</label><textarea id="rx-${c.id}" style="min-height:64px"></textarea>
+   <button class="btn pri full" style="margin-top:8px" data-reply="${c.id}">${T.reply}</button>`}</div>`).join("");
+}
+function vClaims(){const T=t(),list=cases.filter(c=>c.claim);
+  if(!list.length)return`<p class="k">${T.empty}</p>`;
+  return list.map(c=>`<div class="card"><div class="meta"><b>${esc(c.name)}</b>${cchip(c.claim.status)}</div>
+  <div class="k">${T.ins}: ${esc(c.claim.ins)} · ${T.amt}: ${esc(c.claim.amt)}</div><p>${esc(c.rx)}</p>
+  ${c.claim.status==="submitted"?`<div class="row"><button class="btn pri" data-cl="${c.id}:approved">${T.approve}</button><button class="btn bad" data-cl="${c.id}:rejected">${T.reject}</button></div>`:""}</div>`).join("");
+}
+
+/* ---- events ---- */
+document.addEventListener("click",async e=>{
+  const b=e.target.closest("button");if(!b)return;
+  if(b.dataset.l){stopMic();lang=b.dataset.l;view();}
+  else if(b.dataset.r){stopMic();role=b.dataset.r;view();}
+  else if(b.dataset.t){stopMic();tab=b.dataset.t;view();}
+  else if(b.dataset.listen){const c=cases.find(x=>x.id===b.dataset.listen);if(c)speak(c.symptoms,c.lang);}
+  else if(b.dataset.reply){const id=b.dataset.reply,dx=$("dx-"+id).value.trim(),rx=$("rx-"+id).value.trim();
+    if(!dx&&!rx)return;try{await patch(id,{status:"prescribed",dx,rx,by:me()});toast(t().saved);}catch(x){toast("DB: "+(x.message||x.code));}view();}
+  else if(b.dataset.claim){const id=b.dataset.claim,ins=$("ci-"+id).value.trim(),amt=$("ca-"+id).value.trim();
+    if(!ins||!amt)return;try{await patch(id,{claim:{ins,amt,status:"submitted"}});toast(t().saved);}catch(x){toast("DB: "+(x.message||x.code));}view();}
+  else if(b.dataset.cl){const [id,s]=b.dataset.cl.split(":"),c=cases.find(x=>x.id===id);
+    try{await patch(id,{claim:{...c.claim,status:s}});}catch(x){toast("DB: "+(x.message||x.code));}view();}
+});
+
+/* ---- connect database (resolves after load) ---- */
+async function connect(){
+  if(!window.claude||!claude.use)return;
+  try{const u=await claude.use("user");if(u&&u.id)uid=await u.id();}catch(_){}
+  try{db=await claude.use("db");}catch(_){}
+  if(!db){view();return;}
+  cases=[];
+  db.collection("cases").orderBy("ts","desc").limit(100).onSnapshot(s=>{
+    cases=s.docs.map(d=>({id:d.id,...d.data()}));
+    const a=document.activeElement;if(a&&(a.tagName==="TEXTAREA"||a.tagName==="INPUT"))return; /* don't wipe typing */
+    view();},()=>{});
+  view();
+}
+view();
+<\/script>
+</body>
+</html>
+</script>
+<script>
+const D={
+en:{back:"Back to website",home:"Home",about:"About",services:"Services",ai:"AI Solution",contact:"Contact",login:"Log in",signup:"Sign up",
+h1:"Smart Digital Medicine",sub:"See a doctor from home and speak in your own language.",join:"Join now",try:"Try voice consult",
+f1t:"Platform",f1d:"One online place where doctors and patients talk and share records.",f2t:"Voice to text",f2d:"Describe your symptoms out loud in four languages.",f3t:"Easy to use",f3d:"Simple screens that work on any phone.",
+at:"About us",ah:"One platform for every role",ap:"Virtual visits, health records, prescriptions and claims in one secure place, so care can happen at home.",
+mt:"Our mission",m1t:"Empower patients",m1d:"Put people in control of their health information and decisions.",m2t:"Support providers",m2d:"Save clinicians time with clear notes and tools.",m3t:"Protect data",m3d:"Keep health information private and secure.",
+st:"Services",sh:"Built for everyone involved in care",d1t:"For doctors",d1d:"Review cases, listen to the patient’s description, and send advice and prescriptions.",d2t:"For patients",d2d:"Speak your symptoms, follow your visits and send claims from your phone.",d3t:"For clinics",d3d:"Organize cases, work with doctors, and review claims in one place.",more:"Open the app",
+ait:"AI solution",aih:"Voice and AI that save time",aip:"Speech recognition turns speech into notes, and chat assistants help with triage and documentation.",
+a1:"Speech to text in English, French, Kazakh and Burmese.",a2:"Triage and note assistants guide the patient and the doctor.",a3:"Medication and appointment helpers answer common questions.",
+cta:"Ready to try the voice consult?",ask:"See how it works",l1:"Languages",l2:"Assistants",l3:"Roles",foot:"Student project prototype. Demo only, with fictional data."},
+fr:{back:"Retour au site",home:"Accueil",about:"À propos",services:"Services",ai:"Solution IA",contact:"Contact",login:"Connexion",signup:"Inscription",
+h1:"Médecine numérique intelligente",sub:"Consultez un médecin depuis chez vous et parlez dans votre langue.",join:"Rejoindre",try:"Essayer la consultation vocale",
+f1t:"Plateforme",f1d:"Un seul espace en ligne où médecins et patients échangent et partagent les dossiers.",f2t:"Voix en texte",f2d:"Décrivez vos symptômes à voix haute en quatre langues.",f3t:"Facile à utiliser",f3d:"Des écrans simples qui fonctionnent sur tout téléphone.",
+at:"À propos",ah:"Une plateforme pour chaque rôle",ap:"Visites virtuelles, dossiers de santé, ordonnances et réclamations au même endroit sécurisé, pour soigner à domicile.",
+mt:"Notre mission",m1t:"Responsabiliser les patients",m1d:"Donner aux gens le contrôle de leurs informations et décisions de santé.",m2t:"Soutenir les soignants",m2d:"Faire gagner du temps avec des notes claires et de bons outils.",m3t:"Protéger les données",m3d:"Garder les informations de santé privées et sécurisées.",
+st:"Services",sh:"Conçu pour tous les acteurs des soins",d1t:"Pour les médecins",d1d:"Examinez les cas, écoutez la description du patient et envoyez conseils et ordonnances.",d2t:"Pour les patients",d2d:"Dites vos symptômes, suivez vos visites et envoyez vos réclamations depuis votre téléphone.",d3t:"Pour les cliniques",d3d:"Organisez les dossiers, travaillez avec les médecins et examinez les réclamations au même endroit.",more:"Ouvrir l’application",
+ait:"Solution IA",aih:"Voix et IA pour gagner du temps",aip:"La reconnaissance vocale transforme la parole en notes et des assistants aident au triage et à la documentation.",
+a1:"Voix en texte en anglais, français, kazakh et birman.",a2:"Des assistants de triage et de notes guident le patient et le médecin.",a3:"Des aides pour médicaments et rendez-vous répondent aux questions courantes.",
+cta:"Prêt à essayer la consultation vocale ?",ask:"Voir comment ça marche",l1:"Langues",l2:"Assistants",l3:"Rôles",foot:"Prototype de projet étudiant. Démo avec données fictives."},
+kk:{back:"Сайтқа оралу",home:"Басты бет",about:"Біз туралы",services:"Қызметтер",ai:"ЖИ шешімі",contact:"Байланыс",login:"Кіру",signup:"Тіркелу",
+h1:"Ақылды цифрлық медицина",sub:"Дәрігермен үйден байланысып, өз тіліңізде сөйлеңіз.",join:"Қосылу",try:"Дауыстық кеңесті байқау",
+f1t:"Платформа",f1d:"Дәрігерлер мен пациенттер сөйлесіп, жазбаларын бөлісетін бір онлайн орын.",f2t:"Дауыс – мәтін",f2d:"Белгілеріңізді төрт тілде дауыстап айтыңыз.",f3t:"Қолдануға оңай",f3d:"Кез келген телефонда жұмыс істейтін қарапайым экрандар.",
+at:"Біз туралы",ah:"Әр рөлге арналған бір платформа",ap:"Виртуалды қабылдау, денсаулық жазбалары, рецепттер және талаптар бір қауіпсіз жерде, сондықтан емделуді үйден жүргізуге болады.",
+mt:"Біздің миссия",m1t:"Пациенттерге мүмкіндік беру",m1d:"Адамдарға денсаулығы туралы ақпарат пен шешімдерді өздері басқаруға көмектесу.",m2t:"Медицина қызметкерлерін қолдау",m2d:"Анық жазбалар мен құралдар арқылы уақытты үнемдеу.",m3t:"Деректерді қорғау",m3d:"Денсаулық ақпаратын құпия әрі қауіпсіз сақтау.",
+st:"Қызметтер",sh:"Емдеуге қатысатын әрбір адамға арналған",d1t:"Дәрігерлерге",d1d:"Жағдайларды қарап, пациенттің сипаттамасын тыңдап, кеңес пен рецепт жіберіңіз.",d2t:"Пациенттерге",d2d:"Белгілеріңізді айтып, қабылдауларды қадағалап, телефоннан талап жіберіңіз.",d3t:"Клиникаларға",d3d:"Жағдайларды реттеп, дәрігерлермен жұмыс істеп, талаптарды бір жерде қараңыз.",more:"Қолданбаны ашу",
+ait:"ЖИ шешімі",aih:"Уақытты үнемдейтін дауыс пен ЖИ",aip:"Дауысты тану сөзді жазбаға айналдырады, ал чат көмекшілері сұрыптау мен құжаттамаға көмектеседі.",
+a1:"Ағылшын, француз, қазақ және бирма тілдерінде дауыстан мәтінге.",a2:"Сұрыптау және жазба көмекшілері пациент пен дәрігерге жол көрсетеді.",a3:"Дәрі және жазылу көмекшілері жиі қойылатын сұрақтарға жауап береді.",
+cta:"Дауыстық кеңесті байқауға дайынсыз ба?",ask:"Қалай жұмыс істейтінін білу",l1:"Тіл",l2:"Көмекші",l3:"Рөл",foot:"Студенттік жоба прототипі. Жалған деректермен демо."},
+my:{back:"ဝဘ်ဆိုက်သို့ ပြန်သွားရန်",home:"ပင်မ",about:"ကျွန်ုပ်တို့အကြောင်း",services:"ဝန်ဆောင်မှုများ",ai:"AI ဖြေရှင်းချက်",contact:"ဆက်သွယ်ရန်",login:"ဝင်ရန်",signup:"စာရင်းသွင်းရန်",
+h1:"စမတ် ဒစ်ဂျစ်တယ် ဆေးပညာ",sub:"အိမ်ကနေ ဆရာဝန်နဲ့ တွေ့ဆုံပြီး ကိုယ့်ဘာသာစကားနဲ့ ပြောနိုင်ပါတယ်။",join:"ယခု ပါဝင်ရန်",try:"အသံဖြင့် ဆွေးနွေးကြည့်ရန်",
+f1t:"ပလက်ဖောင်း",f1d:"ဆရာဝန်နဲ့ လူနာ ဆွေးနွေးပြီး မှတ်တမ်းမျှဝေနိုင်တဲ့ အွန်လိုင်းနေရာတစ်ခု။",f2t:"အသံမှ စာသား",f2d:"ရောဂါလက္ခဏာကို ဘာသာစကားလေးမျိုးနဲ့ အသံထွက်ပြောနိုင်ပါတယ်။",f3t:"သုံးရလွယ်သည်",f3d:"ဖုန်းမည်သည့်အမျိုးအစားမဆို အလုပ်လုပ်တဲ့ ရိုးရှင်းသော မျက်နှာပြင်များ။",
+at:"ကျွန်ုပ်တို့အကြောင်း",ah:"ရာထူးတိုင်းအတွက် ပလက်ဖောင်းတစ်ခု",ap:"အွန်လိုင်းဆွေးနွေးမှု၊ ကျန်းမာရေးမှတ်တမ်း၊ ဆေးညွှန်းနဲ့ ကုန်ကျစရိတ်တောင်းခံမှုတွေကို လုံခြုံတဲ့နေရာတစ်ခုတည်းမှာ ထားလို့ အိမ်ကနေ ကုသမှုခံယူနိုင်ပါတယ်။",
+mt:"ကျွန်ုပ်တို့၏ ရည်မှန်းချက်",m1t:"လူနာများကို အားဖြည့်ခြင်း",m1d:"ကိုယ့်ကျန်းမာရေးအချက်အလက်နဲ့ ဆုံးဖြတ်ချက်တွေကို ကိုယ်တိုင်ထိန်းချုပ်နိုင်ရန်။",m2t:"ကျန်းမာရေးဝန်ထမ်းများကို ပံ့ပိုးခြင်း",m2d:"ရှင်းလင်းသော မှတ်စုများနဲ့ ကိရိယာတွေဖြင့် အချိန်သက်သာစေရန်။",m3t:"ဒေတာကာကွယ်ခြင်း",m3d:"ကျန်းမာရေးအချက်အလက်များကို လျှို့ဝှက်ပြီး လုံခြုံစွာ ထားရန်။",
+st:"ဝန်ဆောင်မှုများ",sh:"ကုသမှုတွင် ပါဝင်သူတိုင်းအတွက်",d1t:"ဆရာဝန်များအတွက်",d1d:"လူနာအမှုတွေကြည့်၊ လူနာ၏ဖော်ပြချက်ကို နားထောင်ပြီး အကြံပြုချက်နဲ့ ဆေးညွှန်း ပို့နိုင်ပါတယ်။",d2t:"လူနာများအတွက်",d2d:"ရောဂါလက္ခဏာပြော၊ ကုသမှုများကို လိုက်ကြည့်ပြီး ဖုန်းကနေ တောင်းခံမှုပို့နိုင်ပါတယ်။",d3t:"ဆေးခန်းများအတွက်",d3d:"အမှုတွေကို စီစဉ်၊ ဆရာဝန်တွေနဲ့ အလုပ်လုပ်ပြီး တောင်းခံမှုတွေကို တစ်နေရာတည်းမှာ စစ်ဆေးနိုင်ပါတယ်။",more:"အက်ပ်ကို ဖွင့်ရန်",
+ait:"AI ဖြေရှင်းချက်",aih:"အချိန်သက်သာစေတဲ့ အသံနဲ့ AI",aip:"အသံမှတ်သားခြင်းက စကားကို မှတ်စုအဖြစ်ပြောင်းပေးပြီး chat လက်ထောက်တွေက ကနဦးစစ်ဆေးမှုနဲ့ မှတ်တမ်းတင်ရာမှာ ကူညီပါတယ်။",
+a1:"အင်္ဂလိပ်၊ ပြင်သစ်၊ ကာဇက်၊ မြန်မာ ဘာသာများဖြင့် အသံမှ စာသား။",a2:"ကနဦးစစ်ဆေးရေးနဲ့ မှတ်စုလက်ထောက်တွေက လူနာနဲ့ ဆရာဝန်ကို လမ်းညွှန်ပါတယ်။",a3:"ဆေးနဲ့ ရက်ချိန်းလက်ထောက်တွေက မကြာခဏမေးတဲ့မေးခွန်းတွေကို ဖြေပါတယ်။",
+cta:"အသံဖြင့် ဆွေးနွေးမှုကို စမ်းကြည့်ဖို့ အဆင်သင့်ပါပြီလား။",ask:"အလုပ်လုပ်ပုံ ကြည့်ရန်",l1:"ဘာသာစကား",l2:"လက်ထောက်",l3:"ရာထူး",foot:"ကျောင်းသားပရောဂျက် နမူနာ။ စိတ်ကူးယဉ်ဒေတာဖြင့် စမ်းသပ်မှုသာဖြစ်သည်။"}
+};
+function setLang(l){
+  document.documentElement.lang=l;
+  document.querySelectorAll("[data-i]").forEach(e=>e.textContent=D[l][e.dataset.i]);
+  document.title="eHospital – "+D[l].h1;
+}
+const ov=document.getElementById("appov"),frm=document.getElementById("appf");
+function openApp(){
+  if(!ov.hidden)return;
+  let s=document.getElementById("appsrc").textContent.replace(/<\\\/script>/g,"<"+"/script>");
+  s=s.replace('let lang="en"','let lang="'+sel.value+'"');
+  frm.srcdoc=s;ov.hidden=false;document.body.style.overflow="hidden";
+}
+function closeApp(){ov.hidden=true;frm.srcdoc="";document.body.style.overflow="";}
+function route(){location.hash==="#app"?openApp():closeApp();}
+document.querySelectorAll("a.app").forEach(a=>{a.href="#app";});
+document.getElementById("back").onclick=()=>{location.hash="home";};
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!ov.hidden)location.hash="home";});
+window.addEventListener("hashchange",route);
+const sel=document.getElementById("lang");
+sel.onchange=()=>setLang(sel.value);
+setLang("en");route();
+</script>
+</body>
+</html>
