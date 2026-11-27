@@ -271,7 +271,7 @@ smp:"နှစ်ရက်ကတည်းက ဖျားပြီး လည်�
 };
 
 const $=id=>document.getElementById(id),esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-let lang="en",role="p",tab="speak",activeMicTarget=null,rec=null,cases=[],appointments=[],feedbacks=[],stats={patients:0,doctors:0};
+let lang="en",role="p",tab="speak",activeMicTarget=null,rec=null,mediaRec=null,audioChunks=[],lastAudioUrl="",cases=[],appointments=[],feedbacks=[],stats={patients:0,doctors:0};
 const KEY="ehospital_cases_v2";
 try{cases=JSON.parse(localStorage.getItem(KEY)||"[]");}catch(_){cases=[];}
 function persist(){try{localStorage.setItem(KEY,JSON.stringify(cases.slice(0,200)));}catch(_){}}
@@ -325,7 +325,7 @@ const sel=async(sql,rep)=>(await api("/sql/select","POST",{sql,replacements:rep|
 
 async function connectApi(){
   try{
-    const c=new AbortController();setTimeout(()=>c.abort(),25000);
+    const c=new AbortController();setTimeout(()=>c.abort(),7000);
     const meta=await api("/tables");
     apiOn=true;
     (meta.tables||[]).forEach(tb=>{tableSchemas[tb.name]=tb.attributes||[];});
@@ -397,7 +397,6 @@ async function refresh(){
       status:r.completed_at?"prescribed":"waiting",dx:r.clinical_summary||"",rx:r.recommended_action||"",claim:cm[String(r.record_id)]||null
     }));
 
-    // Load appointments (from appointments table if present, or appt- tagged records)
     if(tableSchemas.appointments){
       const aCols=tableSchemas.appointments;
       const dtCol=aCols.includes("appointment_date")?"appointment_date":aCols.includes("scheduled_at")?"scheduled_at":"created_at";
@@ -421,7 +420,6 @@ async function refresh(){
       appointments=ar.map(a=>({id:a.record_id,patient:a.name,doctor:String(a.queue_name).slice(APPT_TAG.length),when:a.check_in_time,reason:a.symptoms,status:"Scheduled"}));
     }
 
-    // Load patient feedback for Clinic dashboard
     if(tableSchemas.patient_feedback){
       feedbacks=await sel("SELECT * FROM patient_feedback ORDER BY 1 DESC LIMIT 30");
     }
@@ -507,7 +505,13 @@ async function patch(id,p){
   await refresh();
 }
 
-function docSel(){return apiOn&&doctors.length?`<label for="docsel">${t().rd}</label><select id="docsel"><option value="">–</option>${doctors.map(d=>`<option value="${esc(d.doctor_id)}" ${String(d.doctor_id)===String(docId)?"selected":""}>${esc(d.name)}</option>`).join("")}</select>`:"";}
+function getDoctors(){
+  return doctors.length?doctors:[
+    {doctor_id:1,name:"Dr. Thiri Aung (General)"},
+    {doctor_id:2,name:"Dr. Marc Tremblay (Internal)"}
+  ];
+}
+function docSel(){const list=getDoctors();return `<label for="docsel">${t().rd}</label><select id="docsel">${list.map(d=>`<option value="${esc(d.doctor_id)}" ${String(d.doctor_id)===String(docId)?"selected":""}>${esc(d.name)}</option>`).join("")}</select>`;}
 document.addEventListener("change",e=>{if(e.target.id==="docsel")docId=e.target.value;});
 setInterval(async()=>{if(apiOn&&tab!=="speak"&&tab!=="book"&&tab!=="fb"&&!document.querySelector("textarea:focus,input:focus,select:focus")){await refresh();view();}},20000);
 
@@ -571,19 +575,20 @@ function bindSpeak(){
   $("send").onclick=async()=>{
     if(!form.name.trim()||!form.sym.trim()){toast(t().need);return;}
     stopMic();
-    try{await addCase({pid:me(),name:form.name.trim(),dob:form.age,phone:form.phone,allergy:form.allergy,symptoms:form.sym.trim(),lang,ts:Date.now(),status:"waiting",dx:"",rx:"",claim:null});}
+    await new Promise(res=>setTimeout(res,120));
+    try{await addCase({pid:me(),name:form.name.trim(),dob:form.age,phone:form.phone,allergy:form.allergy,symptoms:form.sym.trim(),audio:lastAudioUrl,lang,ts:Date.now(),status:"waiting",dx:"",rx:"",claim:null});}
     catch(e){toast("DB: "+(e.message||e.code));return;}
-    form.sym="";toast(t().sent);tab="visits";view();
+    form.sym="";lastAudioUrl="";toast(t().sent);tab="visits";view();
   };
 }
 
 /* ---- patient: book appointment ---- */
 function vBook(){
-  const T=t();
+  const T=t(),list=getDoctors();
   return loginCard()+`<div class="card"><h3 style="margin:0 0 8px">${T.bookh}</h3>
     <label for="b-name">${T.name}</label><input id="b-name" value="${esc(form.name)}">
     <label for="b-phone">${T.phone}</label><input id="b-phone" inputmode="tel" value="${esc(form.phone)}">
-    <label for="b-doc">${T.doc}</label><select id="b-doc">${doctors.length?doctors.map(d=>`<option value="${esc(d.doctor_id)}" ${String(d.doctor_id)===String(bookForm.docId)?"selected":""}>${esc(d.name)}</option>`).join(""):'<option value="1">General Clinic</option>'}</select>
+    <label for="b-doc">${T.doc}</label><select id="b-doc">${list.map(d=>`<option value="${esc(d.doctor_id)}" ${String(d.doctor_id)===String(bookForm.docId)?"selected":""}>${esc(d.name)}</option>`).join("")}</select>
     <div class="row"><div><label for="b-date">${T.date}</label><input id="b-date" type="date" value="${esc(bookForm.date||today())}"></div>
     <div><label for="b-time">${T.time}</label><input id="b-time" type="time" value="${esc(bookForm.time)}"></div></div>
     <label for="b-reason">${T.reason}</label><textarea id="b-reason" style="min-height:68px">${esc(bookForm.reason)}</textarea>
@@ -625,12 +630,32 @@ function bindFeedback(){
   };
 }
 
-/* ---- shared voice-to-text helper (patient + doctor) ---- */
-function toggleMic(targetId){
+/* ---- shared voice-to-text + real patient audio recorder ---- */
+async function toggleMic(targetId){
   if(activeMicTarget===targetId){stopMic();return;}
   stopMic();
   if(!SR){toast(t().nosr);return;}
   const targetEl=$(targetId);if(!targetEl)return;
+
+  if(targetId==="f-sym"&&navigator.mediaDevices&&window.MediaRecorder){
+    try{
+      const stream=await navigator.mediaDevices.getUserMedia({audio:true});
+      audioChunks=[];
+      mediaRec=new MediaRecorder(stream);
+      mediaRec.ondataavailable=e=>{if(e.data.size>0)audioChunks.push(e.data);};
+      mediaRec.onstop=()=>{
+        stream.getTracks().forEach(tr=>tr.stop());
+        if(audioChunks.length){
+          const blob=new Blob(audioChunks,{type:"audio/webm"});
+          const reader=new FileReader();
+          reader.onloadend=()=>{lastAudioUrl=reader.result;};
+          reader.readAsDataURL(blob);
+        }
+      };
+      mediaRec.start();
+    }catch(_){}
+  }
+
   rec=new SR();rec.lang=t().code;rec.continuous=true;rec.interimResults=false;
   rec.onresult=e=>{
     for(let i=e.resultIndex;i<e.results.length;i++)if(e.results[i].isFinal){
@@ -648,6 +673,7 @@ function toggleMic(targetId){
 function stopMic(){
   activeMicTarget=null;
   if(rec){try{rec.stop();}catch(_){}}
+  if(mediaRec&&mediaRec.state!=="inactive"){try{mediaRec.stop();}catch(_){}}
   document.querySelectorAll("[data-mic]").forEach(b=>b.classList.remove("on"));
   if($("mst"))$("mst").textContent=t().mic;
 }
@@ -662,7 +688,7 @@ function vVisits(){const T=t(),mine=cases.filter(c=>c.pid===me());
   <button class="btn pri full" style="margin-top:8px" data-claim="${c.id}">${T.sendclaim}</button>`:""}</div>`).join(""));
 }
 
-/* ---- doctor (with voice-to-text dictation on Diagnosis & Prescription) ---- */
+/* ---- doctor ---- */
 function speak(txt,code){
   if(!window.speechSynthesis){toast(t().nosyn);return;}
   speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(txt);u.lang=L[code]?L[code].code:code;
@@ -695,17 +721,36 @@ function vClaims(){const T=t(),list=cases.filter(c=>c.claim);
 /* ---- clinic dashboard ---- */
 function vDash(){
   const T=t();
+  const docList=getDoctors();
   const waiting=cases.filter(c=>c.status!=="prescribed").length;
   const openClaims=cases.filter(c=>c.claim&&c.claim.status==="submitted").length;
   const ratings=feedbacks.map(f=>Number(f.rating||f.score||0)).filter(n=>n>0);
   const avgFb=ratings.length?(ratings.reduce((a,b)=>a+b,0)/ratings.length).toFixed(1)+" ★":"–";
+
+  const patientMap={};
+  cases.forEach(c=>{if(!patientMap[c.name])patientMap[c.name]=c;});
+  const patientList=Object.values(patientMap);
+
   return `<div class="kpis">
-    <div class="kpi"><b>${stats.patients||cases.length}</b><span class="k">${T.kpat}</span></div>
-    <div class="kpi"><b>${stats.doctors||doctors.length}</b><span class="k">${T.kdoc}</span></div>
+    <div class="kpi"><b>${stats.patients||patientList.length}</b><span class="k">${T.kpat}</span></div>
+    <div class="kpi"><b>${stats.doctors||docList.length}</b><span class="k">${T.kdoc}</span></div>
     <div class="kpi"><b>${waiting}</b><span class="k">${T.kwait}</span></div>
     <div class="kpi"><b>${openClaims} · ${avgFb}</b><span class="k">${T.kclm} / ${T.kfb}</span></div>
   </div>
-  <h3 style="margin:6px 0 8px">${T.allfb}</h3>`+
+
+  <h3 style="margin:12px 0 6px">${T.kdoc} (${docList.length})</h3>
+  ${docList.map(d=>`<div class="card" style="padding:10px 14px;margin-bottom:8px">
+    <div class="meta" style="margin:0"><b>🩺 ${esc(d.name)}</b><span class="chip">ID #${esc(d.doctor_id)}</span></div>
+  </div>`).join("")}
+
+  <h3 style="margin:12px 0 6px">${T.kpat} (${patientList.length})</h3>
+  ${!patientList.length?`<p class="k">${T.empty}</p>`:patientList.map(p=>`<div class="card" style="padding:10px 14px;margin-bottom:8px">
+    <div class="meta"><b>${esc(p.name)}</b>${chip(p)}</div>
+    <div class="k">${esc(p.phone||"-")} · ${T.allergy}: ${esc(p.allergy||"-")}</div>
+    <p style="margin:4px 0 0;font-size:.9rem">${esc(p.symptoms)}</p>
+  </div>`).join("")}
+
+  <h3 style="margin:12px 0 6px">${T.allfb}</h3>`+
   (!feedbacks.length?`<p class="k">${T.empty}</p>`:feedbacks.map(f=>`<div class="card">
     <div class="meta"><b>${"★".repeat(Number(f.rating||f.score||5))}</b><span class="k">${esc(f.submitted_at||f.created_at||"")}</span></div>
     <p style="margin:0">${esc(f.comments||f.feedback_text||"")}</p></div>`).join(""));
@@ -731,7 +776,11 @@ document.addEventListener("click",async e=>{
     if(found){toast(t().logged+" "+found.name);view();}else{toast(t().notfound);}
   }
   else if(b.id==="logout-btn"){saveSession(null);cases=[];appointments=[];view();}
-  else if(b.dataset.listen){const c=cases.find(x=>x.id===b.dataset.listen);if(c)speak(c.symptoms,c.lang);}
+  else if(b.dataset.listen){
+    const c=cases.find(x=>x.id===b.dataset.listen);
+    if(c&&c.audio){new Audio(c.audio).play();}
+    else if(c){speak(c.symptoms,c.lang);}
+  }
   else if(b.dataset.reply){stopMic();const id=b.dataset.reply,dx=$("dx-"+id).value.trim(),rx=$("rx-"+id).value.trim();
     if(!dx&&!rx)return;try{await patch(id,{status:"prescribed",dx,rx,by:me()});toast(t().saved);}catch(x){toast("DB: "+(x.message||x.code));}view();}
   else if(b.dataset.claim){const id=b.dataset.claim,ins=$("ci-"+id).value.trim(),amt=$("ca-"+id).value.trim();
